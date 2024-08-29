@@ -1,0 +1,18 @@
+---
+apiversion: v1
+kind: pod
+metadata:
+  name: fristpodspec
+  labels:
+    app: nginx
+    version: v1
+spec: 
+  containers:
+    - name: ngnixcontainer
+      image: latest
+      ports:
+        - containerport: 80
+          protocol: TCP
+          
+  
+  

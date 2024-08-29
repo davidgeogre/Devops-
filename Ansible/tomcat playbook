@@ -1,0 +1,52 @@
+---
+- name: installing apache tomcat on ubuntu
+  become: yes
+  hosts: all
+  tasks:
+    - name: Increase Python recursion limit
+      set_fact:   
+        ansible_python_interpreter: /usr/bin/python3
+    - name: update and installing java 11 
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        update_cache: yes
+        state: present
+    - name: creating a group tomcat
+      ansible.builtin.group:
+        name: tomcat
+        state: present
+    - name: creating a system user tomcat
+      ansible.builtin.user:
+        name: tomcat
+        create_home: true
+        group: tomcat 
+        home: /opt/tomcat
+        shell: /bin/false
+        state: present
+    - name: download and extract tomcat
+      ansible.builtin.unarchive:
+        src: https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.28/bin/apache-tomcat-10.1.28.tar.gz
+        dest: /opt/tomcat
+        remote_src: yes
+    - name: create a symbolic link
+      ansible.builtin.file:
+        src: /opt/tomcat/apache-tomcat-10.1.28
+        dest: /opt/tomcat/latest
+        owner: tomcat
+        group: tomcat
+        state: link
+    - name: change ownership of the directory
+      ansible.builtin.file:
+        path: /opt/tomcat
+        state: directory
+        recurse: yes
+        owner: tomcat
+        group: tomcat
+    - name: give execute permission to shell files
+      ansible.builtin.shell:
+        cmd: "chmod +x /opt/tomcat/latest/bin/*.sh" # cmd should be mentioned in ""
+        executable: "/bin/bash"
+   
+
+
+

@@ -1,0 +1,28 @@
+---
+- name: installing nginx webpage fitapp
+  become: yes
+  hosts: all
+  tasks:
+  - name: update and install nginx
+    ansible.builtin.apt: 
+      name:
+        - nginx
+        - unzip
+      update_cache: yes
+      state: present
+  - name: downloading fitapp website
+    ansible.builtin.get_url:
+      url: https://www.free-css.com/assets/files/free-css-templates/download/page293/fitapp.zip
+      dest: /tmp/fitapp.zip 
+  - name: unzip the downloaded file 
+    ansible.builtin.unarchive:
+      src: /tmp/fitapp.zip 
+      dest: /var/www/html/
+      remote_src: yes
+  - name: rename the directory
+    ansible.builtin.file:
+      src: /var/www/html/mobile-app-html-template
+      dest: /var/www/html/fitapp
+      state: link
+
+
