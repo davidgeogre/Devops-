@@ -3,6 +3,10 @@
   become: yes
   hosts: all
   tasks:
+    - name: fail if the playbook is not running on ubuntu distrubition
+      ansible.builtin.fail:
+        msg:" This playbook is designed to run on ubuntu only "
+      when: ansible_facts['distribution'] != 'CentOs'
     - name: update and installing java 11 
       ansible.builtin.apt:
         name: "{{ java_version }}"
@@ -52,8 +56,8 @@
         owner: "{{ user_name }}"
         group: "{{ group_name }}"
     - name: create a service file
-      ansible.builtin.copy:
-        src: tomcat.service
+      ansible.builtin.template:
+        src: tomcat.service.j2
         dest: /etc/systemd/system/tomcat.service
     - name: enable and start tomcat
       ansible.builtin.systemd:
@@ -61,13 +65,13 @@
         state: started
         enabled: yes
     - name: update configuration files
-      ansible.builtin.file:
+      ansible.builtin.template:
         src: "{{ item.src }}"
         dest: "{{ item.dest }}"
       loop:
-        - { src: tomcat-user.xml, dest: "{{ home_dir }}/latest/conf/tomcat-users.xml" }
-        - { src: manager_context.xml, dest: "{{ home_dir }}/latest/webapps/manager/META-INF/context.xml" }
-        - { src: host-manager_context.xml, dest: "{{ home_dir }}/latest/webapps/host-manager/META-INF/context.xml" }
+        - { src: tomcat-user.xml.j2, dest: "{{ home_dir }}/latest/conf/tomcat-users.xml" }
+        - { src: manager_context.xml.j2, dest: "{{ home_dir }}/latest/webapps/manager/META-INF/context.xml" }
+        - { src: host-manager_context.xml.j2, dest: "{{ home_dir }}/latest/webapps/host-manager/META-INF/context.xml" }
       notify:
         - restart tomcat service
   handlers:
